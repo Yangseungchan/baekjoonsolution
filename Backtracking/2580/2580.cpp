@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <stack>
 
 using namespace std;
 
@@ -10,11 +11,11 @@ private:
   vector<vector<int>> table;
   vector<int> zero_row;  // 0의 가로 위치 보관
   vector<int> zero_col;  // 0의 세로 위치 보관
-  vector<int> zero_flag; // 0이 있는 곳의 좌표가 수정되었는지 표시
-  int zero_cnt;
+  stack<int> num_stk;
+  int zero_max;
 
 public:
-  Seudoku() : zero_cnt(0)
+  Seudoku() : zero_max(0)
   {
     number = vector<int>(10, 0);        /* index from 0 to 9 */
     table.assign(9, vector<int>(9, 0)); /* index from 0 to 8 */
@@ -32,12 +33,11 @@ public:
         {
           zero_row.push_back(i);
           zero_col.push_back(j);
-          zero_cnt++;
+          zero_max++;
         }
         table[i][j] = num;
       }
     }
-    zero_flag.assign(zero_cnt, 0);
   }
 
   void init_number()
@@ -48,48 +48,12 @@ public:
     }
   }
 
-  void check_row(int zero_idx)
+  void check_row_col(int zero_idx)
   {
-    init_number();
     for (int j = 0; j < 9; j++)
     {
       number[table[zero_row[zero_idx]][j]]++;
-    }
-    if (number[0] == 1)
-    {
-      for (int j = 1; j < 10; j++)
-      {
-        if (number[j] == 0)
-        {
-          table[zero_row[zero_idx]][zero_col[zero_idx]] = j;
-          zero_flag[zero_idx] = 1; // zero_flag에 변경되었음을 표시
-          zero_cnt -= 1;
-          break;
-        }
-      }
-    }
-    return;
-  }
-
-  void check_col(int zero_idx)
-  {
-    init_number();
-    for (int i = 0; i < 9; i++)
-    {
-      number[table[i][zero_col[zero_idx]]]++;
-    }
-    if (number[0] == 1)
-    {
-      for (int j = 1; j < 10; j++)
-      {
-        if (number[j] == 0)
-        {
-          table[zero_row[zero_idx]][zero_col[zero_idx]] = j;
-          zero_flag[zero_idx] = 1;
-          zero_cnt -= 1;
-          break;
-        }
-      }
+      number[table[j][zero_col[zero_idx]]]++;
     }
     return;
   }
@@ -98,7 +62,6 @@ public:
   {
     int row_cnt = zero_row[zero_idx] / 3;
     int col_cnt = zero_col[zero_idx] / 3;
-    init_number();
 
     for (int i = 3 * row_cnt; i < 3 * row_cnt + 3; i++)
     {
@@ -107,42 +70,32 @@ public:
         number[table[i][j]]++;
       }
     }
-    if (number[0] == 1)
-    {
-      for (int j = 1; j < 10; j++)
-      {
-        if (number[j] == 0)
-        {
-          table[zero_row[zero_idx]][zero_col[zero_idx]] = j;
-          zero_flag[zero_idx] = 1;
-          zero_cnt -= 1;
-          break;
-        }
-      }
-    }
     return;
+  }
+
+  bool possible() // checking possibity of insertion
+  {
+    for(int i=1; i<10; i++)
+    {
+      if(number[i] == 0)
+        return true;
+    }
+    return false;
   }
 
   void fill_blank()
   {
-    do
+    for(int i=0; i<zero_max; i++)
     {
-      for (int i = 0; i < zero_flag.size(); i++)
-      {
-        if (zero_flag[i] == 0)
-          check_row(i);
-        if (zero_flag[i] == 0)
-          check_col(i);
-        if (zero_flag[i] == 0)
-          check_block(i);
-      }
-    } while (zero_cnt > 0);
+      visit_blank(i);
+    }
+  }
 
-    cout << "result\n";
-
-    for (int i = 0; i < 9; i++) /* print table after searching*/
+  void print_table()
+  {
+    for(int i=0; i<9; i++)
     {
-      for (int j = 0; j < 9; j++)
+      for(int j=0; j<9; j++)
       {
         cout << table[i][j] << " ";
       }
