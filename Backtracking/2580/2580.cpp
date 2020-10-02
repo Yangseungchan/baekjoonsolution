@@ -9,8 +9,8 @@ class Seudoku
 private:
   vector<int> number;
   vector<vector<int>> table;
-  vector<int> zero_row;  // 0의 가로 위치 보관
-  vector<int> zero_col;  // 0의 세로 위치 보관
+  vector<int> zero_row; // 0의 가로 위치 보관
+  vector<int> zero_col; // 0의 세로 위치 보관
   stack<int> num_stk;
   int zero_max;
 
@@ -73,11 +73,11 @@ public:
     return;
   }
 
-  bool possible() // checking possibity of insertion
+  bool possible(vector<int> &ref) // check했을때 어느 하나의 숫자라도 table에서 0의 자리에 대입 가능한지의 여부를 판단하는 함수
   {
-    for(int i=1; i<10; i++)
+    for (int i = 1; i < 10; i++)
     {
-      if(number[i] == 0)
+      if (ref[i] == 0)
         return true;
     }
     return false;
@@ -85,17 +85,54 @@ public:
 
   void fill_blank()
   {
-    for(int i=0; i<zero_max; i++)
+    vector<int> temp(10, 0);
+    int start_idx = 0;
+    init_number();            // number 초기화
+    check_row_col(start_idx); // 가로, 세로 확인
+    check_block(start_idx);   // 3x3 block 확인
+    temp = number;
+    for (int i = 1; i < 10; i++)
     {
-      visit_blank(i);
+      if (temp[i] == 0)
+      {
+        visit_blank(start_idx, i);
+      }
     }
+  }
+
+  void visit_blank(int idx, int num)
+  {
+    vector<int> temp(10, 0);
+    table[zero_row[idx]][zero_col[idx]] = num;
+    idx++;
+    if (idx >= zero_max)
+    {
+      print_table();
+      exit(0);
+    }
+    init_number();
+    check_row_col(idx);
+    check_block(idx);
+    temp = number;
+
+    if (possible(temp))
+    {
+      for (int i = 1; i < 10; i++)
+      {
+        if (temp[i] == 0)
+        {
+          visit_blank(idx, i);
+        }
+      }
+    }
+    table[zero_row[idx - 1]][zero_col[idx - 1]] = 0;
   }
 
   void print_table()
   {
-    for(int i=0; i<9; i++)
+    for (int i = 0; i < 9; i++)
     {
-      for(int j=0; j<9; j++)
+      for (int j = 0; j < 9; j++)
       {
         cout << table[i][j] << " ";
       }
