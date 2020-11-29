@@ -5,6 +5,10 @@ using namespace std;
 
 int main(void)
 {
+    cin.tie(NULL);
+    cout.tie(NULL);
+    ios_base::sync_with_stdio(false);
+
     long long multiply, result, number, multi_cnt, rest_idx;
     cin >> number >> multi_cnt >> rest_idx;
 
