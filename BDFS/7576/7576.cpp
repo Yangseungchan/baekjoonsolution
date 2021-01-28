@@ -2,7 +2,6 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
-#include <climits>
 
 using namespace std;
 
@@ -13,7 +12,7 @@ typedef struct __pos
     int days;
 } Pos;
 
-int result;
+int result, fresh_tmt;
 int M, N; // M = 가로길이(j), N = 세로길이(i)
 vector<vector<int>> graph;
 vector<vector<bool>> visit;
@@ -47,6 +46,7 @@ void bfs()
                 bfs_queue.push(index1);
                 graph[index1.x][index1.y] = 1;
                 visit[index1.x][index1.y] = true;
+                fresh_tmt--;
             }
         }
         if (index.x - 1 >= 0)
@@ -57,6 +57,7 @@ void bfs()
                 bfs_queue.push(index1);
                 graph[index1.x][index1.y] = 1;
                 visit[index1.x][index1.y] = true;
+                fresh_tmt--;
             }
         }
         if (index.y + 1 < M)
@@ -67,6 +68,7 @@ void bfs()
                 bfs_queue.push(index1);
                 graph[index1.x][index1.y] = 1;
                 visit[index1.x][index1.y] = true;
+                fresh_tmt--;
             }
         }
         if (index.y - 1 >= 0)
@@ -77,6 +79,7 @@ void bfs()
                 bfs_queue.push(index1);
                 graph[index1.x][index1.y] = 1;
                 visit[index1.x][index1.y] = true;
+                fresh_tmt--;
             }
         }
     }
@@ -94,7 +97,7 @@ int main(void)
     graph = vector<vector<int>>(N, vector<int>(M, 0));
     visit = vector<vector<bool>>(N, vector<bool>(M));
     result = -1;
-
+    fresh_tmt = 0;
     for (int i = 0; i < N; i++)
     {
         for (int j = 0; j < M; j++)
@@ -106,21 +109,19 @@ int main(void)
                 bfs_queue.push(pos);
                 visit[i][j] = true;
             }
+            if (input == 0)
+            {
+                ++fresh_tmt;
+            }
             graph[i][j] = input;
         }
     }
 
     if (!bfs_queue.empty())
         bfs();
-    for (int i = 0; i < N; i++)
+    if (fresh_tmt > 0)
     {
-        for (int j = 0; j < M; j++)
-        {
-            if (graph[i][j] == 0)
-            {
-                result = -1;
-            }
-        }
+        result = -1;
     }
     cout << result << '\n';
 
